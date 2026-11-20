@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TextSummarizer AI</title>
+    
+    <!-- Premium Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Oswald:wght@500;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-main: #ff6b00;
+            --bg-card: #ffffff;
+            --text-dark: #FF7700;
+            --text-light: #ffffff;
+            --text-muted: #555555;
+            --border-light: rgba(255, 255, 255, 0.3);
+            --radius: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            scroll-behavior: smooth;
+        }
+
+        html, body, .magazine-wrapper, .summary-text, .overlay-content {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        
+        html::-webkit-scrollbar, 
+        body::-webkit-scrollbar, 
+        .magazine-wrapper::-webkit-scrollbar,
+        .summary-text::-webkit-scrollbar,
+        .overlay-content::-webkit-scrollbar {
+            display: none;
+            width: 0px;
+            background: transparent;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            background: linear-gradient(135deg, #ff8c00, #ff4500);
+        }
+
+        .magazine-wrapper {
+            background-image: url('https://wallpapercave.com/wp/wp14680390.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: local;
+            width: 100%;
+            max-width: 1200px;
+            min-height: 800px;
+            margin: auto;
+            border-radius: 16px;
+            position: relative;
+            overflow-x: hidden;
+            overflow-y: auto;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.3);
+            display: flex;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .sidebar {
+            width: 80px;
+            border-left: 1px solid var(--border-light);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 40px 0;
+            align-items: center;
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            z-index: 10;
+            background: rgba(0,0,0,0.1); 
+        }
+
+        .sidebar-line {
+            width: 1px;
+            height: 150px;
+            background-color: var(--border-light);
+        }
+
+        .social-icons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .social-icon {
+            width: 36px;
+            height: 36px;
+            border: 1px solid var(--border-light);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-light);
+            text-decoration: none;
+            font-size: 14px;
+            font-family: 'Oswald', sans-serif;
+            transition: 0.3s;
+        }
+
+        .social-icon:hover {
+            background: var(--text-light);
+            color: var(--bg-main);
+        }
+
+        .content-area {
+            flex: 1;
+            padding: 40px 60px;
+            padding-right: 100px;
+            position: relative;
+            z-index: 5;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            color: var(--text-light);
+        }
+
+        .logo {
+            font-family: 'Syne', sans-serif;
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .logo span {
+            color: var(--text-dark);
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 30px;
+        }
+
+        nav a {
+            color: var(--text-light);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 700;
+            font-family: 'Oswald', sans-serif;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: 0.3s;
+            padding-bottom: 5px;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+
+        nav a:hover, nav a.active {
+            color: var(--text-dark);
+            border-bottom: 2px solid var(--text-dark);
+        }
+
+        .hero-split {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            flex: 1;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        .hero-text {
+            position: relative;
+            z-index: 2;
+            animation: fadeIn 0.8s ease;
+        }
+
+        .section-num {
+            font-family: 'Oswald', sans-serif;
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+
+        .section-num span {
+            font-size: 12px;
+            color: rgba(255,255,255,0.6);
+        }
+
+        .section-num::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border-light);
+            max-width: 100px;
+        }
+
+        .main-title {
+            font-family: 'Oswald', sans-serif;
+            font-size: 72px;
+            line-height: 0.95;
+            font-weight: 700;
+            color: var(--text-light);
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            letter-spacing: -1px;
+            text-shadow: 0 3px 10px rgba(0,0,0,0.4);
+        }
+
+        .main-title span {
+            color: var(--text-dark);
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .hero-desc {
+            color: rgba(255,255,255,0.95);
+            font-size: 16px;
+            line-height: 1.6;
+            max-width: 400px;
+            margin-bottom: 30px;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.4);
+        }
+
+        .upload-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .file-upload-wrapper {
+            position: relative;
+            border: 2px dashed rgba(255,255,255,0.6);
+            padding: 25px;
+            border-radius: var(--radius);
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(5px);
+        }
+
+        .file-upload-wrapper:hover {
+            border-color: var(--text-light);
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+        }
+
+        .file-upload-wrapper input[type="file"] {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .file-upload-wrapper p {
+            color: var(--text-light);
+            font-size: 15px;
+            font-weight: 600;
+            font-family: 'Oswald', sans-serif;
+            letter-spacing: 0.5px;
+        }
+
+        .file-upload-wrapper .file-name {
+            color: var(--text-dark);
+            font-weight: 600;
+            margin-top: 10px;
+            display: block;
+            font-size: 13px;
+        }
+
+        .btn-submit {
+            background: var(--text-light);
+            color: var(--bg-main);
+            border: none;
+            padding: 18px;
+            font-family: 'Oswald', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            border-radius: var(--radius);
+            transition: 0.3s;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .btn-submit:hover {
+            background: var(--text-dark);
+            color: var(--text-light);
+            transform: translateY(-2px);
+            box-shadow: 0 15px 25px rgba(0,0,0,0.3);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.7;
+            cursor: wait;
+            transform: none;
+        }
+
+        .hero-visual {
+            position: relative;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .big-back-text {
+            position: absolute;
+            bottom: 0;
+            left: -50px;
+            font-family: 'Syne', sans-serif;
+            font-size: 120px;
+            font-weight: 800;
+            color: var(--text-light);
+            opacity: 0.15;
+            line-height: 0.8;
+            pointer-events: none;
+            white-space: nowrap;
+            z-index: 1;
+        }
+
+        .visual-graphic {
+            width: 320px;
+            height: 380px;
+            position: relative;
+            z-index: 2;
+            background: var(--bg-card);
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            padding: 35px 30px;
+            transform: rotate(5deg);
+            transition: transform 0.4s ease;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .visual-graphic:hover {
+            transform: rotate(0deg) scale(1.02);
+        }
+
+        .graphic-header {
+            margin-bottom: 30px;
+        }
+
+        .graphic-header h4 {
+            font-family: 'Syne', sans-serif;
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--text-dark);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .graphic-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .sk-line { 
+            height: 12px; 
+            background: #f0f0f0; 
+            border-radius: 6px; 
+        }
+        .sk-line.w-90 { width: 90%; }
+        .sk-line.w-80 { width: 80%; }
+        .sk-line.w-95 { width: 95%; }
+        .sk-line.highlight { 
+            background: var(--bg-main); 
+            width: 40%; 
+            margin-top: 25px; 
+        }
+
+        .graphic-footer {
+            font-size: 14px;
+            color: #666;
+            font-weight: 600;
+            margin-top: auto;
+        }
+
+        .paging {
+            display: flex;
+            gap: 20px;
+            color: var(--text-light);
+            font-family: 'Oswald', sans-serif;
+            font-size: 13px;
+            letter-spacing: 1px;
+        }
+
+        .paging span { opacity: 0.5; }
+        .paging span.active { opacity: 1; font-weight: 700; color: var(--text-dark); }
+
+        .result-section {
+            background: var(--text-light);
+            padding: 30px;
+            border-radius: var(--radius);
+            animation: slideUp 0.6s ease;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            outline: none;
+        }
+
+        .result-section h3 {
+            font-family: 'Oswald', sans-serif;
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            color: var(--bg-main);
+        }
+
+        .stats-row {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .stat-item { display: flex; flex-direction: column; }
+
+        .stat-item span {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-weight: 600;
+            font-family: 'Oswald', sans-serif;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-item strong {
+            font-size: 24px;
+            color: var(--text-dark);
+            font-family: 'Oswald', sans-serif;
+        }
+
+        .flow-steps {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .flow-step {
+            background: #fff3e0;
+            color: var(--bg-main);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .summary-text {
+            font-size: 16px;
+            font-weight: 700;
+            line-height: 1.8;
+            color: #111111;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 20px;
+            background: #fcfcfc;
+            border-radius: 8px;
+            border: 1px solid #eee;
+        }
+
+        .action-btns {
+            margin-top: 25px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .action-btns button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-family: 'Oswald', sans-serif;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            transition: 0.3s;
+        }
+
+        .btn-copy { background: var(--text-dark); color: white; }
+        .btn-copy:hover { background: #b34700; transform: translateY(-2px); }
+        
+        .btn-download { background: var(--bg-main); color: white; }
+        .btn-download:hover { background: #e65c00; transform: translateY(-2px); }
+
+        .btn-clear { background: #6c757d; color: white; }
+        .btn-clear:hover { background: #5a6268; transform: translateY(-2px); }
+
+        .info-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .overlay-content {
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 16px;
+            max-width: 800px;
+            width: 100%;
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            animation: slideUp 0.4s ease;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px; right: 20px;
+            background: none; border: none;
+            font-size: 30px; cursor: pointer;
+            color: var(--text-dark);
+            transition: 0.3s;
+            line-height: 1;
+        }
+
+        .close-btn:hover {
+            color: var(--bg-main);
+            transform: scale(1.1);
+        }
+
+        .info-section {
+            display: none;
+        }
+
+        .info-section h2 {
+            font-family: 'Oswald', sans-serif;
+            font-size: 28px;
+            text-transform: uppercase;
+            color: var(--bg-main);
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .grid-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .info-card {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid var(--bg-main);
+        }
+
+        .info-card h3 {
+            font-family: 'Oswald', sans-serif;
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: var(--text-dark);
+        }
+
+        .info-card p {
+            font-size: 14px;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .info-card .code-tag {
+            display: inline-block;
+            background: #fff3e0;
+            color: var(--bg-main);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            margin-top: 8px;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0) rotate(5deg); }
+            50% { transform: translateY(-15px) rotate(7deg); }
+            100% { transform: translateY(0) rotate(5deg); }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @media (max-width: 1024px) {
+            .hero-split { grid-template-columns: 1fr; }
+            .hero-visual { display: none; }
+            .main-title { font-size: 56px; }
+            .sidebar { width: 60px; }
+            .content-area { padding: 40px 60px; padding-right: 80px; }
+            .big-back-text { display: none; }
+        }
+
+        @media (max-width: 768px) {
+            .magazine-wrapper { flex-direction: column; min-height: auto; border-radius: 0; }
+            .sidebar { position: relative; width: 100%; height: 60px; flex-direction: row; padding: 0 20px; border-left: none; border-bottom: 1px solid var(--border-light); }
+            .sidebar-line { display: none; }
+            .social-icons { flex-direction: row; }
+            .content-area { padding: 20px; }
+            .main-title { font-size: 42px; }
+            nav ul { display: none; }
+            .stats-row { flex-direction: column; gap: 15px; }
+            .action-btns { flex-direction: column; }
+            .overlay-content { padding: 25px; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="magazine-wrapper">
+        
+        <!-- Right Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-line"></div>
+            <div class="social-icons">
+                <a href="#" class="social-icon">f</a>
+                <a href="#" class="social-icon">t</a>
+                <a href="#" class="social-icon">in</a>
+            </div>
+        </div>
+
+        <div class="content-area" id="home">
+            <!-- Header with Navigation -->
+            <header>
+                <div class="logo">TEXT<span>SUMMARIZER</span></div>
+                <nav>
+                    <ul>
+                        <li><a href="#" id="nav-home" class="active" onclick="closeSection()">Home</a></li>
+                        <li><a href="#" id="nav-algo" onclick="openSection('algorithm')">Algorithm</a></li>
+                        <li><a href="#" id="nav-nlp" onclick="openSection('nlp')">NLP Techniques</a></li>
+                    </ul>
+                </nav>
+            </header>
+
+            <!-- Main Hero Section -->
+            <div class="hero-split">
+                <div class="hero-text">
+                    <div class="section-num">
+                        01 <span>/05</span>
+                    </div>
+                    
+                    <h1 class="main-title">
+                        SMART<br>
+                        <span>EXTRACTION</span><br>
+                        AI POWER!
+                    </h1>
+
+                    <p class="hero-desc">
+                        Upload your PDF or Image file and let our advanced TextRank algorithm extract the core essence instantly.
+                    </p>
+
+                    <!-- Flash Messages -->
+                    {% with messages = get_flashed_messages() %}
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div style="background: rgba(220,38,38,0.9); color: white; padding: 12px; border-radius: 8px; margin-bottom: 15px; font-size: 14px; font-weight: 500;">
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+
+                    <form method="POST" enctype="multipart/form-data" id="uploadForm" class="upload-form">
+                        <label class="file-upload-wrapper">
+                            <input type="file" name="article" id="article" accept=".pdf, .jpg, .jpeg, .png, .webp, application/pdf, image/*" required>
+                            <p>📄 Choose PDF/Image or Drag & Drop</p>
+                            <span class="file-name" id="fileName">Max 15MB</span>
+                        </label>
+                        
+                        <button type="submit" class="btn-submit" id="submitBtn">
+                            Generate Summary →
+                        </button>
+                    </form>
+
+                    <div class="paging">
+                        <span class="active">01</span>
+                        <span>02</span>
+                        <span>03</span>
+                        <span>04</span>
+                        <span>05</span>
+                    </div>
+                </div>
+
+                <div class="hero-visual">
+                    <div class="big-back-text">TEXT<br>RANK</div>
+                    
+                    <!-- NLP Engine Card -->
+                    <div class="visual-graphic">
+                        <div class="graphic-header">
+                            <h4>NLP ENGINE</h4>
+                        </div>
+                        <div class="graphic-body">
+                            <div class="sk-line w-90"></div>
+                            <div class="sk-line w-80"></div>
+                            <div class="sk-line w-95"></div>
+                            <div class="sk-line w-80"></div>
+                            <div class="sk-line highlight"></div>
+                        </div>
+                        <div class="graphic-footer">
+                            Extracting key sentences...
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Result Section -->
+            {% if result %}
+            <div class="result-section" id="result" tabindex="-1">
+                <h3>Extraction Complete</h3>
+                
+                <!-- Step-by-Step Flow -->
+                <div class="flow-steps">
+                    <div class="flow-step">1. Text Extracted (OCR)</div>
+                    <div class="flow-step">2. Sentence Tokenization</div>
+                    <div class="flow-step">3. POS Tagging + Lemmatization</div>
+                    <div class="flow-step">4. TF-IDF Vectorization</div>
+                    <div class="flow-step">5. TextRank (PageRank) Scoring</div>
+                    <div class="flow-step">6. Top Sentences Selected</div>
+                </div>
+
+                <div class="stats-row">
+                    <div class="stat-item">
+                        <span>Original Words</span>
+                        <strong>{{ result.original_words }}</strong>
+                    </div>
+                    <div class="stat-item">
+                        <span>Summary Words</span>
+                        <strong>{{ result.summary_words }}</strong>
+                    </div>
+                    <div class="stat-item">
+                        <span>Compression</span>
+                        <strong>{{ result.compression }}%</strong>
+                    </div>
+                </div>
+
+                <div class="summary-text" id="summaryText">
+                    {{ result.summary }}
+                </div>
+
+                <div class="action-btns">
+                    <button class="btn-copy" onclick="copySummary()">Copy Text</button>
+                    <button class="btn-download" onclick="downloadSummary()">Download .txt</button>
+                    <button class="btn-clear" onclick="clearSummary()">Clear</button>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Info Sections Modal Overlay -->
+    <div id="infoOverlay" class="info-overlay">
+        <div class="overlay-content">
+            <button class="close-btn" onclick="closeSection()">×</button>
+            
+            <!-- Algorithm Section -->
+            <div class="info-section" id="algorithm">
+                <h2>Algorithms Used</h2>
+                <div class="grid-cards">
+                    <div class="info-card">
+                        <h3>TF-IDF Vectorizer</h3>
+                        <p>Term Frequency-Inverse Document Frequency converts sentences into mathematical vectors. It highlights important words while reducing the weight of common words. Each sentence becomes a numeric vector representing its word importance.</p>
+                        <span class="code-tag">TfidfVectorizer(stop_words="english")</span>
+                    </div>
+                    <div class="info-card">
+                        <h3>TextRank (PageRank)</h3>
+                        <p>Builds a graph where sentences are nodes and similarity scores are edges. Uses Google's PageRank algorithm to find the most central and important sentences. Sentences with higher PageRank scores are considered more important.</p>
+                        <span class="code-tag">nx.pagerank(graph, weight="weight")</span>
+                    </div>
+                    <div class="info-card">
+                        <h3>POS Tagging</h3>
+                        <p>Part-of-Speech tagging identifies each word's grammatical role (noun, verb, adjective, etc.). This helps in accurate lemmatization and better text understanding before vectorization.</p>
+                        <span class="code-tag">nltk.pos_tag(words)</span>
+                    </div>
+                    <div class="info-card">
+                        <h3>Lemmatization</h3>
+                        <p>Reduces words to their base dictionary form using WordNet. For example, "running" → "run", "better" → "good". This normalizes text and improves similarity detection between sentences.</p>
+                        <span class="code-tag">WordNetLemmatizer().lemmatize()</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NLP Techniques Section -->
+            <div class="info-section" id="nlp">
+                <h2>NLP Techniques Used</h2>
+                <div class="grid-cards">
+                    <div class="info-card">
+                        <h3>Tokenization</h3>
+                        <p>Breaking down the large text into individual sentences and tokens (words) for easier processing. Sentence tokenization splits text on punctuation like periods, exclamation marks, and question marks.</p>
+                        <span class="code-tag">nltk.word_tokenize()</span>
+                    </div>
+                    <div class="info-card">
+                        <h3>Stop-word Removal</h3>
+                        <p>Filtering out common words like "is", "the", "and" which don't carry much meaning. This focuses the algorithm on important keywords and reduces noise in the similarity calculations.</p>
+                        <span class="code-tag">stop_words="english"</span>
+                    </div>
+                    <div class="info-card">
+                        <h3>Extractive Summarization</h3>
+                        <p>Selecting the most important existing sentences from the original document rather than generating new text. This preserves the original meaning and ensures factual accuracy.</p>
+                        <span class="code-tag">Summary = Top-N ranked sentences</span>
+                    </div>
+                    <div class="info-card">
+                        <h3>POS Tag Mapping</h3>
+                        <p>Maps NLTK POS tags to WordNet POS tags (ADJ, VERB, NOUN, ADV) for accurate lemmatization. This ensures each word is reduced to its correct base form based on its grammatical role.</p>
+                        <span class="code-tag">get_wordnet_pos(tag)</span>
+                    </div>
+                    <div class="info-card">
+                        <h3>Weighted Graph Construction</h3>
+                        <p>Creates a graph from the similarity matrix where each sentence is a node and similarity scores are edge weights. Self-connections are removed to avoid bias in ranking.</p>
+                        <span class="code-tag">nx.from_numpy_array(similarity_matrix)</span>
+                    </div>
+                    <div class="info-card">
+                        <h3>Summary Length Control</h3>
+                        <p>Dynamically calculates the number of sentences to select based on the desired summary ratio (short: 15%, medium: 30%, long: 50%). Ensures a balanced summary length.</p>
+                        <span class="code-tag">num_sentences = ceil(len(sentences) * ratio)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const resultSection = document.getElementById('result');
+            if (resultSection) {
+                setTimeout(() => {
+                    resultSection.focus();
+                    resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 300);
+            }
+        });
+
+        const fileInput = document.getElementById("article");
+        const fileNameDisplay = document.getElementById("fileName");
+
+        if (fileInput) {
+            fileInput.addEventListener("change", function() {
+                if (this.files && this.files[0]) {
+                    fileNameDisplay.textContent = this.files[0].name;
+                    fileNameDisplay.style.color = "#ffffff";
+                    fileNameDisplay.style.background = "rgba(0,0,0,0.2)";
+                    fileNameDisplay.style.padding = "4px 8px";
+                    fileNameDisplay.style.borderRadius = "4px";
+                } else {
+                    fileNameDisplay.textContent = "Max 15MB";
+                    fileNameDisplay.style.color = "var(--text-dark)";
+                    fileNameDisplay.style.background = "transparent";
+                }
+            });
+        }
+
+        const uploadForm = document.getElementById("uploadForm");
+        if (uploadForm) {
+            uploadForm.addEventListener("submit", function() {
+                const btn = document.getElementById("submitBtn");
+                btn.disabled = true;
+                btn.textContent = "Extracting & Summarizing...";
+            });
+        }
+
+        function copySummary() {
+            const text = document.getElementById("summaryText").innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                alert("Summary copied to clipboard!");
+            });
+        }
+
+        function downloadSummary() {
+            const text = document.getElementById("summaryText").innerText;
+            const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = "TextSummarizer_Summary.txt";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        function clearSummary() {
+            window.location.href = window.location.pathname;
+        }
+
+        function openSection(sectionId) {
+            document.getElementById('infoOverlay').style.display = 'flex';
+            document.getElementById('algorithm').style.display = 'none';
+            document.getElementById('nlp').style.display = 'none';
+            
+            document.querySelectorAll('nav a').forEach(l => l.classList.remove('active'));
+            
+            if (sectionId === 'algorithm') {
+                document.getElementById('algorithm').style.display = 'block';
+                document.getElementById('nav-algo').classList.add('active');
+            } else if (sectionId === 'nlp') {
+                document.getElementById('nlp').style.display = 'block';
+                document.getElementById('nav-nlp').classList.add('active');
+            }
+        }
+
+        function closeSection() {
+            document.getElementById('infoOverlay').style.display = 'none';
+            document.querySelectorAll('nav a').forEach(l => l.classList.remove('active'));
+            document.getElementById('nav-home').classList.add('active');
+        }
+    </script>
+</body>
+</html>
